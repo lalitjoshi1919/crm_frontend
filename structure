@@ -1,0 +1,78 @@
+FINAL_PROJECT/
+│
+├── client-api/                       # Backend (Express API)
+│   ├── node_modules/
+│   ├── src/
+│   │   ├── helpers/                  # Utility functions for backend
+│   │   │   ├── bcrypt.helper.js
+│   │   │   ├── jwt.helper.js
+│   │   │   └── email.helper.js
+│   │   ├── middlewares/             # Middleware functions
+│   │   │   ├── authorization.middleware.js
+│   │   │   └── formValidation.middleware.js
+│   │   ├── model/                   # Mongoose models
+│   │   │   ├── restPin/
+│   │   │   │   ├── RestPin.model.js
+│   │   │   ├── ticket/
+│   │   │   │   ├── Ticket.model.js
+│   │   │   │   └── Ticket.schema.js
+│   │   │   └── user/
+│   │   │       ├── User.model.js
+│   │   │       └── User.schema.js
+│   │   ├── routers/                 # Route handlers
+│   │   │   ├── ticket.router.js
+│   │   │   ├── tokens.router.js
+│   │   │   └── user.router.js
+│   │   └── utils/
+│   ├── app.js                       # Main server entry file
+│   ├── package.json
+│   └── package-lock.json
+│
+├── crm_ticket/                      # Frontend (React App)
+│   ├── node_modules/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/                     # API utility files
+│   │   │   ├── passwordApi.js
+│   │   │   ├── ticketApi.js
+│   │   │   └── userApi.js
+│   │   ├── assets/                  # Static assets like images
+│   │   │   └── img/
+│   │   ├── components/             # Reusable UI components
+│   │   │   ├── add-ticket-form/
+│   │   │   ├── breadcrumb/
+│   │   │   ├── login/
+│   │   │   ├── message-history/
+│   │   │   ├── password-reset/
+│   │   │   ├── private-route/
+│   │   │   ├── registration-form/
+│   │   │   ├── search-form/
+│   │   │   ├── ticket-table/
+│   │   │   └── update-ticket/
+│   │   ├── layout/
+│   │   │   └── DefaultLayout.js
+│   │   ├── page/                    # Page-level components
+│   │   │   ├── dashboard/
+│   │   │   ├── entry/
+│   │   │   ├── new-ticket/
+│   │   │   ├── password-reset/
+│   │   │   ├── registration/
+│   │   │   ├── ticket/
+│   │   │   └── user-verification/
+│   │   ├── App.css
+│   │   ├── App.js
+│   │   ├── App.test.jsx
+│   │   ├── index.jsx
+│   │   ├── serviceWorker.js
+│   │   ├── setupTests.js
+│   │   └── store.js                 # Redux store setup
+│   ├── .env
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── index.html
+│   ├── vite.config.js
+│   └── README.md
+│
+├── .gitignore
+└── README.md
