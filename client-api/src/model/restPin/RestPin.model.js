@@ -10,7 +10,7 @@ const setPasswordRestPin = async (email) => {
 
   const restObj = {
     email,
-    pin: randPin,
+    pin: randPin,    
   };
 
   return new Promise((resolve, reject) => {

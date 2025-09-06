@@ -1,7 +1,7 @@
 const express = require("express");
-const { route, post } = require("./ticket.router");
 const router = express.Router();
 const mongoose = require("mongoose");
+const { route, post } = require("./ticket.router");
 const { User } = require("../model/user/User.schema");
 
 const {
@@ -230,7 +230,7 @@ router.post("/login", async (req, res) => {
 router.post("/reset-password", resetPassReqValidation, async (req, res) => {
   const { email } = req.body;
 
-  const user = await getUserByEmail(email.toLowerCase());
+  const user = await getUserByEmail(email.toLowerCase());   
 
   if (user && user._id) {
     /// crate// 2. create unique 6 digit pin

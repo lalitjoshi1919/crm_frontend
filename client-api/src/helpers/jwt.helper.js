@@ -9,7 +9,7 @@ const createAccessJWT = async (email, _id) => {
       expiresIn: "1d", //change this to 15m
     });
 
-    await setJWT(accessJWT, _id);
+    await setJWT(accessJWT, _id);   //stored in redis
 
     return Promise.resolve(accessJWT);
   } catch (error) {

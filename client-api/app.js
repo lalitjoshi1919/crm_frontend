@@ -1,65 +1,60 @@
 require("dotenv").config();
 const express = require("express");
-const app = express();
-const bodyParser = require("body-parser");
-const cors = require("cors");
 const helmet = require("helmet");
+const cors = require("cors");
 const morgan = require("morgan");
-const port = process.env.PORT || 3001;
-
-//API security
-app.use(helmet());
-
-//handle CORS error
-app.use(cors());
-
-//MongoDB Connection Setup
 const mongoose = require("mongoose");
 
-mongoose.connect(process.env.MONGO_URL);
-
-if (process.env.NODE_ENV !== "production") {
-  const mDb = mongoose.connection;
-  mDb.on("open", () => {
-    console.log("MongoDB is conneted");
-  });
-
-  mDb.on("error", (error) => {
-    console.log(error);
-  });
-
-  //Logger
-  app.use(morgan("tiny"));
-}
-
-// Set body bodyParser
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-//Load routers
 const userRouter = require("./src/routers/user.router");
 const ticketRouter = require("./src/routers/ticket.router");
 const tokensRouter = require("./src/routers/tokens.router");
+const handleError = require("./src/utils/errorHandler");
 
-//Use Routers
+const app = express();
+const port = process.env.PORT || 3001;
+
+// Security
+app.use(helmet());
+
+// CORS
+app.use(cors({ origin: process.env.FRONTEND_URL || "*", credentials: true }));
+
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Logger (dev only)
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("tiny"));
+}
+
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log("MongoDB connected successfully!"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);
+  });
+
+// Routes
 app.use("/v1/user", userRouter);
 app.use("/v1/ticket", ticketRouter);
 app.use("/v1/tokens", tokensRouter);
 
-//Error handler
-const handleError = require("./src/utils/errorHandler");
-
+// 404 handler
 app.use((req, res, next) => {
-  const error = new Error("Resources not found!");
+  const error = new Error("Resource not found!");
   error.status = 404;
   next(error);
 });
 
-app.use((error, req, res, next) => {
-  handleError(error, res);
-});
+// Global error handler
+app.use((error, req, res, next) => handleError(error, res));
 
+// Start server
 app.listen(port, () => {
   console.log(`API is ready on http://localhost:${port}`);
 });

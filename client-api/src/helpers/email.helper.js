@@ -1,27 +1,46 @@
 const nodemailer = require("nodemailer");
 
-// Send email using a fresh Ethereal account each time (for dev/testing)
-const send = async (info) => {
-  try {
-    // Create a test account on the fly
-    const testAccount = await nodemailer.createTestAccount();
-
-    // Create transporter with that test account
-    const transporter = nodemailer.createTransport({
-      host: testAccount.smtp.host,
-      port: testAccount.smtp.port,
-      secure: testAccount.smtp.secure,
+// Create transporter (switch between Ethereal for dev and SMTP for prod)
+const createTransporter = async () => {
+  if (process.env.NODE_ENV === "production") {
+    // ✅ Production transporter (use real SMTP service like SendGrid, Gmail, AWS SES, Mailgun, etc.)
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST, // e.g., "smtp.sendgrid.net"
+      port: process.env.EMAIL_PORT || 587,
+      secure: false, // true for port 465, false for 587
       auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
+  } else {
+    // ✅ Development transporter (Ethereal for testing)
 
-    // Send mail with defined transport object
-    let result = await transporter.sendMail(info);
+    const transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      auth: {
+        user: "abe.kohler59@ethereal.email",
+        pass: "8Bft1DC6qX7319GZ1f",
+      },
+    });
+    return transporter;
+  }
+};
+
+// Send email
+const send = async (info) => {
+  try {
+    const transporter = await createTransporter();
+    
+    const result = await transporter.sendMail(info);
 
     console.log("Message sent: %s", result.messageId);
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(result));
+
+    if (process.env.NODE_ENV !== "production") {
+      // For dev/testing → show preview URL
+      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(result));
+    }
 
     return result;
   } catch (error) {
@@ -30,6 +49,7 @@ const send = async (info) => {
   }
 };
 
+// Email processor
 const emailProcessor = async ({ email, pin, type, verificationLink = "" }) => {
   let info = {};
   switch (type) {
@@ -57,7 +77,6 @@ const emailProcessor = async ({ email, pin, type, verificationLink = "" }) => {
       break;
 
     case "new-user-confirmation-required":
-      // Show a human-readable link in the email
       const decodedLink = decodeURIComponent(verificationLink);
       info = {
         from: '"CMR Company" <no-reply@cmr.com>',
@@ -74,7 +93,6 @@ const emailProcessor = async ({ email, pin, type, verificationLink = "" }) => {
       return;
   }
 
-  // Always await send!
   return await send(info);
 };
 
