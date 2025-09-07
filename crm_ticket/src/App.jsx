@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import "./App.css";
+import "./styles/global.css";
 import { Header } from "./layout/partials/Header.comp";
 
 import { PrivateRoute } from "./components/private-route/PrivateRoute.comp";

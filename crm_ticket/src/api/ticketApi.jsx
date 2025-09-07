@@ -1,14 +1,14 @@
 /* eslint-disable no-async-promise-executor */
 import axios from "axios";
 
-const rootUrl = "http://localhost:3001/v1/";
+const rootUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/v1/";
 const ticketUlr = rootUrl + "ticket/";
 const closeTicketUrl = rootUrl + "ticket/close-ticket/";
 
 export const getAllTickets = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const result = await axios.get("http://localhost:3001/v1/ticket", {
+      const result = await axios.get(rootUrl + "ticket", {
         headers: {
           Authorization: sessionStorage.getItem("accessJWT"),
         },

@@ -15,8 +15,8 @@ export const Entry = () => {
   };
 
   return (
-    <div className="entry-page bg-info">
-      <div className="form-box bg-light p-4 rounded shadow">
+    <div className="entry-page custom-bg">
+      <div className="form-box custom-card">
         {frmLoad === "login" && <LoginForm formSwitcher={formSwitcher} />}
         {frmLoad === "rest" && (
           <ResetPassword

@@ -14,8 +14,8 @@ import {
 
 const initialState = {
 	pin: "",
-	password: "sfsd#3Dsg",
-	confirmPass: "sfsd#3Dsg",
+	password: "",
+	confirmPass: "",
 };
 const passVerificationError = {
 	isLenthy: false,
@@ -101,7 +101,7 @@ const UpdatePasswordForm = () => {
 
 			<Row>
 				<Col>
-					<Form onSubmit={handleOnSubmit}>
+					<Form onSubmit={handleOnSubmit} autoComplete="off">
 						<Form.Group>
 							<Form.Label>OTP</Form.Label>
 							<Form.Control

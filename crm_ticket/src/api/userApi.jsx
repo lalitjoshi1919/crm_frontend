@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const rootUrl = "http://localhost:3001/v1/";
+const rootUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/v1/";
 const userProfileUrl = rootUrl + "user";
 const loginUrl = rootUrl + "user/login";
 const logoutUrl = rootUrl + "user/logout";

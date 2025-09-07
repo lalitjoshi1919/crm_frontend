@@ -10,11 +10,11 @@ export const PasswordOtpForm = () => {
   const { showUpdatePassForm } = useSelector(state => state.password);
 
   return (
-    <div className="entry-page bg-info">
-      <div className="form-box bg-light p-4 rounded shadow">
+    <div className="entry-page custom-bg">
+      <div className="form-box custom-card">
         {showUpdatePassForm ? <UpdatePasswordForm /> : <ResetPassword />}
         <div className="text-center">
-          <a href="/">Login Now</a>
+          <a href="/" className="custom-link">Login Now</a>
         </div>
       </div>
     </div>

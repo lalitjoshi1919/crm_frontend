@@ -4,9 +4,9 @@ import "./registration.style.css";
 
 export const Registration = () => {
   return (
-    <div className="registration-page bg-info">
+    <div className="registration-page custom-bg">
       <div className="mt-5">
-        <div className="form-box bg-light p-4 rounded shadow">
+        <div className="form-box custom-card">
           <RegistrationForm />
         </div>
       </div>

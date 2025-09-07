@@ -32,8 +32,8 @@ export const LoginForm = ({ formSwitcher }) => {
     // eslint-disable-next-line
   }, []);
 
-  const [email, setEmail] = useState("e2@e.com");
-  const [password, setPassword] = useState("password#1F");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleOnChange = e => {
     const { name, value } = e.target;
@@ -95,6 +95,10 @@ export const LoginForm = ({ formSwitcher }) => {
                 value={email}
                 onChange={handleOnChange}
                 placeholder="Enter Email"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
             </Form.Group>
@@ -105,7 +109,11 @@ export const LoginForm = ({ formSwitcher }) => {
                 name="password"
                 onChange={handleOnChange}
                 value={password}
-                placeholder="password"
+                placeholder="Enter Password"
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
             </Form.Group>

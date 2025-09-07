@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 import axios from "axios";
 
-const rootUrl = "http://localhost:3001/v1/";
+const rootUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/v1/";
 const otpReqUrl = rootUrl + "user/reset-password";
 const updatePassUrl = rootUrl + "user/reset-password";
 

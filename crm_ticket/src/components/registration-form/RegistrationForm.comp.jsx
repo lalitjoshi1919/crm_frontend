@@ -12,13 +12,13 @@ import { newUserRegistration } from "./userRegAction";
 import { useDispatch, useSelector } from "react-redux";
 
 const initialState = {
-  name: "Prem Acharya",
-  phone: "0410000000",
-  email: "fakeemail@email.com",
-  company: "Dented Code",
-  address: "George st Sydney",
-  password: "sfsd#3Dsg",
-  confirmPass: "sfsd#3Dsg",
+  name: "",
+  phone: "",
+  email: "",
+  company: "",
+  address: "",
+  password: "",
+  confirmPass: "",
 };
 const passVerificationError = {
   isLenthy: false,
@@ -106,7 +106,7 @@ const RegistrationForm = () => {
 
       <Row>
         <Col>
-          <Form onSubmit={handleOnSubmit}>
+          <Form onSubmit={handleOnSubmit} autoComplete="off">
             <Form.Group>
               <Form.Label>Full Name</Form.Label>
               <Form.Control
@@ -139,6 +139,10 @@ const RegistrationForm = () => {
                 value={newUser.email}
                 onChange={handleOnChange}
                 placeholder="Enter email"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
             </Form.Group>
@@ -175,6 +179,10 @@ const RegistrationForm = () => {
                 value={newUser.password}
                 onChange={handleOnChange}
                 placeholder="Password"
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
             </Form.Group>
@@ -187,6 +195,10 @@ const RegistrationForm = () => {
                 value={newUser.confirmPass}
                 onChange={handleOnChange}
                 placeholder="Confirm Password"
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 required
               />
             </Form.Group>
