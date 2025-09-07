@@ -50,7 +50,7 @@ export const TicketTable = () => {
                   to={`/ticket/${row._id}`}
                   className="ticket-subject-link"
                 >
-                  📋 {row.subject}
+                  {row.subject}
                 </Link>
               </td>
               <td>

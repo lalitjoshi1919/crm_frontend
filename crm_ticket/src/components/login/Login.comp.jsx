@@ -24,7 +24,7 @@ export const LoginForm = ({ formSwitcher }) => {
   const { isLoading, isAuth, error } = useSelector(state => state.login);
   let { from } = location.state || { from: { pathname: "/" } };
 
-  // ✅ Only run this effect once on mount to prevent infinite loop
+  // Only run this effect once on mount to prevent infinite loop
   useEffect(() => {
     if (sessionStorage.getItem("accessJWT")) {
       navigate(from, { replace: true });

@@ -6,7 +6,7 @@ export const PageBreadcrumb = ({ page }) => {
   return (
     <Breadcrumb className="custom-breadcrumb">
       <span className="breadcrumb-home">
-        🏠 Home
+        Home
       </span>
       <span className="breadcrumb-separator">/</span>
       <Breadcrumb.Item active className="breadcrumb-current">{page}</Breadcrumb.Item>
