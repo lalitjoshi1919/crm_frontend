@@ -80,7 +80,11 @@ app.use((error, req, res, next) => handleError(error, res));
 
 // Start server
 app.listen(port, () => {
+  console.log(`========================================`);
   console.log(`API is ready on http://localhost:${port}`);
+  console.log(`Deployment timestamp: ${new Date().toISOString()}`);
   console.log(`Root route handler is registered at: GET /`);
   console.log(`Health check available at: GET /health`);
+  console.log(`404 handler includes method and URL in error message`);
+  console.log(`========================================`);
 });
