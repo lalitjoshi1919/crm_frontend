@@ -1,8 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
-const { route, post } = require("./ticket.router");
-const { User } = require("../model/user/User.schema");
 
 const {
   insertUser,
@@ -14,7 +11,7 @@ const {
 } = require("../model/user/User.model");
 
 const { hashPassword, comparePassword } = require("../helpers/bcrypt.helper");
-const { createAccessJWT, createRefreshJWT } = require("../helpers/jwt.helper");
+const { createAccessJWT, createRefreshJWT } = require("../helpers/jwt.redis.helper");
 
 const {
   userAuthorization,
@@ -30,11 +27,7 @@ const {
   updatePassValidation,
   newUserValidation,
 } = require("../middlewares/formValidation.middleware");
-const { verify } = require("jsonwebtoken");
-
 const { deleteJWT } = require("../helpers/redis.helper");
-
-const { updateUserVerification } = require("../model/user/User.model");
 
 router.all("/", (req, res, next) => {
   // res.json({ message: "return form user router" });
@@ -44,18 +37,34 @@ router.all("/", (req, res, next) => {
 
 // Get user profile router
 router.get("/", userAuthorization, async (req, res) => {
-  //this data coming form database
-  const _id = req.userId;
+  try {
+    const _id = req.userId;
 
-  const userProf = await getUserById(_id);
-  const { name, email } = userProf;
-  res.json({
-    user: {
-      _id,
-      name,
-      email,
-    },
-  });
+    const userProf = await getUserById(_id);
+    
+    if (!userProf) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const { name, email } = userProf;
+    res.json({
+      status: "success",
+      user: {
+        _id,
+        name,
+        email,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Unable to fetch user profile",
+    });
+  }
 });
 
 ///very user after user is sign up
@@ -163,8 +172,6 @@ router.post("/", newUserValidation, async (req, res) => {
 //User sign in Router
 router.post("/login", async (req, res) => {
   try {
-    console.log(req.body);
-
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -172,16 +179,6 @@ router.post("/login", async (req, res) => {
     }
 
     const user = await getUserByEmail(email.toLowerCase());
-    console.log("Login attempt for:", email.toLowerCase());
-    console.log("User found:", user);
-    if (user) {
-      console.log(
-        "User isVerified:",
-        user.isVerified,
-        "Type:",
-        typeof user.isVerified
-      );
-    }
 
     if (!user) {
       return res.json({
@@ -209,8 +206,11 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const accessJWT = await createAccessJWT(user.email, `${user._id}`);
-    const refreshJWT = await createRefreshJWT(user.email, `${user._id}`);
+    // Create both JWTs in parallel for better performance
+    const [accessJWT, refreshJWT] = await Promise.all([
+      createAccessJWT(user.email, `${user._id}`),
+      createRefreshJWT(user.email, `${user._id}`)
+    ]);
 
     res.json({
       status: "success",
@@ -228,89 +228,166 @@ router.post("/login", async (req, res) => {
 
 
 router.post("/reset-password", resetPassReqValidation, async (req, res) => {
-  const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-  const user = await getUserByEmail(email.toLowerCase());   
+    const user = await getUserByEmail(email.toLowerCase());   
 
-  if (user && user._id) {
-    /// crate// 2. create unique 6 digit pin
-    const setPin = await setPasswordRestPin(email);
-    await emailProcessor({
-      email,
-      pin: setPin.pin,
-      type: "request-new-password",
+    if (user && user._id) {
+      try {
+        // Create unique 6 digit pin
+        const setPin = await setPasswordRestPin(email);
+        
+        if (!setPin || !setPin.pin) {
+          console.error("Failed to generate reset pin");
+          return res.status(500).json({
+            status: "error",
+            message: "Unable to generate reset pin. Please try again later.",
+          });
+        }
+
+        // Send email with pin
+        await emailProcessor({
+          email: email.toLowerCase(),
+          pin: setPin.pin,
+          type: "request-new-password",
+        });
+      } catch (error) {
+        console.error("Error in password reset process:", error);
+        // Still return success to prevent email enumeration
+      }
+    }
+
+    // Always return success message to prevent email enumeration
+    res.json({
+      status: "success",
+      message:
+        "If the email exists in our database, the password reset pin will be sent shortly.",
+    });
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Unable to process password reset request. Please try again later.",
     });
   }
-
-  res.json({
-    status: "success",
-    message:
-      "If the email is exist in our database, the password reset pin will be sent shortly.",
-  });
 });
 
 router.patch("/reset-password", updatePassValidation, async (req, res) => {
-  const { email, pin, newPassword } = req.body;
+  try {
+    const { email, pin, newPassword } = req.body;
 
-  const getPin = await getPinByEmailPin(email, pin);
-  // 2. validate pin
-  if (getPin?._id) {
+    if (!email || !pin || !newPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Email, pin, and new password are required",
+      });
+    }
+
+    const getPin = await getPinByEmailPin(email.toLowerCase(), pin);
+    
+    // Validate pin exists
+    if (!getPin || !getPin._id) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid pin. Please check and try again.",
+      });
+    }
+
+    // Validate pin expiration (1 day)
     const dbDate = getPin.addedAt;
-    const expiresIn = 1;
-
-    let expDate = dbDate.setDate(dbDate.getDate() + expiresIn);
-
+    const expiresIn = 1; // 1 day
+    const expDate = new Date(dbDate.getTime() + (expiresIn * 24 * 60 * 60 * 1000));
     const today = new Date();
 
     if (today > expDate) {
-      return res.json({ status: "error", message: "Invalid or expired pin." });
-    }
-
-    // encrypt new password
-    const hashedPass = await hashPassword(newPassword);
-
-    const user = await updatePassword(email, hashedPass);
-
-    if (user._id) {
-      // send email notification
-      await emailProcessor({ email, type: "update-password-success" });
-
-      ////delete pin from db
-      deletePin(email, pin);
-
-      return res.json({
-        status: "success",
-        message: "Your password has been updated",
+      // Delete expired pin
+      try {
+        await deletePin(email.toLowerCase(), pin);
+      } catch (err) {
+        console.error("Error deleting expired pin:", err);
+      }
+      return res.status(400).json({
+        status: "error",
+        message: "Pin has expired. Please request a new password reset.",
       });
     }
+
+    // Encrypt new password
+    const hashedPass = await hashPassword(newPassword);
+
+    // Update password
+    const user = await updatePassword(email.toLowerCase(), hashedPass);
+
+    if (!user || !user._id) {
+      return res.status(500).json({
+        status: "error",
+        message: "Unable to update your password. Please try again later.",
+      });
+    }
+
+    // Send email notification (non-blocking)
+    try {
+      await emailProcessor({
+        email: email.toLowerCase(),
+        type: "update-password-success",
+      });
+    } catch (emailError) {
+      console.error("Error sending password update email:", emailError);
+      // Continue even if email fails
+    }
+
+    // Delete pin from db
+    try {
+      await deletePin(email.toLowerCase(), pin);
+    } catch (deleteError) {
+      console.error("Error deleting pin after password update:", deleteError);
+      // Continue even if pin deletion fails
+    }
+
+    return res.json({
+      status: "success",
+      message: "Your password has been updated successfully.",
+    });
+  } catch (error) {
+    console.error("Password update error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error. Please try again later",
+    });
   }
-  res.json({
-    status: "error",
-    message: "Unable to update your password. plz try again later",
-  });
 });
 
 // User logout and invalidate jwts
-
 router.delete("/logout", userAuthorization, async (req, res) => {
-  const { authorization } = req.headers;
-  //this data coming form database
-  const _id = req.userId;
+  try {
+    const { authorization } = req.headers;
+    const _id = req.userId;
 
-  // 2. delete accessJWT from redis database
-  deleteJWT(authorization);
+    // Delete accessJWT from redis database
+    await deleteJWT(authorization);
 
-  // 3. delete refreshJWT from mongodb
-  const result = await storeUserRefreshJWT(_id, "");
+    // Delete refreshJWT from mongodb
+    const result = await storeUserRefreshJWT(_id, "");
 
-  if (result._id) {
-    return res.json({ status: "success", message: "Loged out successfully" });
+    if (result && result._id) {
+      return res.json({ 
+        status: "success", 
+        message: "Logged out successfully" 
+      });
+    }
+
+    return res.status(500).json({
+      status: "error",
+      message: "Unable to log you out, please try again later",
+    });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Unable to log you out, please try again later",
+    });
   }
-
-  res.json({
-    status: "error",
-    message: "Unable to logg you out, plz try again later",
-  });
 });
 
 module.exports = router;

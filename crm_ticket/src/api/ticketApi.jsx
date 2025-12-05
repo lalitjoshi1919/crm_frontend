@@ -1,95 +1,74 @@
-/* eslint-disable no-async-promise-executor */
 import axios from "axios";
 
 const rootUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/v1/";
-const ticketUlr = rootUrl + "ticket/";
+const ticketUrl = rootUrl + "ticket/";
 const closeTicketUrl = rootUrl + "ticket/close-ticket/";
 
-export const getAllTickets = () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.get(rootUrl + "ticket", {
+export const getAllTickets = async () => {
+  try {
+    const result = await axios.get(rootUrl + "ticket", {
+      headers: {
+        Authorization: sessionStorage.getItem("accessJWT"),
+      },
+    });
+    return result;
+  } catch (error) {
+    throw error.response?.data || { status: "error", message: error.message };
+  }
+};
+
+export const getSingleTicket = async (_id) => {
+  try {
+    const result = await axios.get(ticketUrl + _id, {
+      headers: {
+        Authorization: sessionStorage.getItem("accessJWT"),
+      },
+    });
+    return result;
+  } catch (error) {
+    throw error.response?.data || { status: "error", message: error.message };
+  }
+};
+
+export const updateReplyTicket = async (_id, msgObj) => {
+  try {
+    const result = await axios.put(ticketUrl + _id, msgObj, {
+      headers: {
+        Authorization: sessionStorage.getItem("accessJWT"),
+      },
+    });
+    return result.data;
+  } catch (error) {
+    throw error.response?.data || { status: "error", message: error.message };
+  }
+};
+
+export const updateTicketStatusClosed = async (_id) => {
+  try {
+    const result = await axios.patch(
+      closeTicketUrl + _id,
+      {},
+      {
         headers: {
           Authorization: sessionStorage.getItem("accessJWT"),
         },
-      });
-
-      resolve(result);
-    } catch (error) {
-      reject(error);
-    }
-  });
+      }
+    );
+    return result.data;
+  } catch (error) {
+    throw error.response?.data || { status: "error", message: error.message };
+  }
 };
 
-export const getSingleTicket = (_id) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.get(ticketUlr + _id, {
-        headers: {
-          Authorization: sessionStorage.getItem("accessJWT"),
-        },
-      });
-
-      resolve(result);
-    } catch (error) {
-      console.log(error.message);
-      reject(error);
-    }
-  });
-};
-
-export const updateReplyTicket = (_id, msgObj) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.put(ticketUlr + _id, msgObj, {
-        headers: {
-          Authorization: sessionStorage.getItem("accessJWT"),
-        },
-      });
-
-      resolve(result.data);
-    } catch (error) {
-      console.log(error.message);
-      reject(error);
-    }
-  });
-};
-
-export const updateTicketStatusClosed = (_id) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.patch(
-        closeTicketUrl + _id,
-        {},
-        {
-          headers: {
-            Authorization: sessionStorage.getItem("accessJWT"),
-          },
-        }
-      );
-
-      resolve(result.data);
-    } catch (error) {
-      console.log(error.message);
-      reject(error);
-    }
-  });
-};
-
-export const createNewTicket = (frmData) => {
-  console.log("from api", frmData);
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.post(ticketUlr, frmData, {
-        headers: {
-          Authorization: sessionStorage.getItem("accessJWT"),
-        },
-      });
-
-      resolve(result.data);
-    } catch (error) {
-      console.log(error.message);
-      reject(error);
-    }
-  });
+export const createNewTicket = async (frmData) => {
+  try {
+    const result = await axios.post(ticketUrl, frmData, {
+      headers: {
+        Authorization: sessionStorage.getItem("accessJWT"),
+      },
+    });
+    return result.data;
+  } catch (error) {
+    throw error.response?.data || { status: "error", message: error.message };
+  }
 };

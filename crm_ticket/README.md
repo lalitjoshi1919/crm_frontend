@@ -160,6 +160,7 @@ The built files will be in the `dist` directory, ready for deployment to any sta
 
 ## Contributing
 
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
@@ -193,3 +194,5 @@ If you encounter any issues or have questions, please:
 ---
 
 **Happy Coding!**
+
+<!-- Updated for deployment - force redeploy -->

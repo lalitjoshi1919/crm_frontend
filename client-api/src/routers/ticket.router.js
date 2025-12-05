@@ -54,12 +54,16 @@ router.post(
         });
       }
 
-      res.json({
+      return res.status(500).json({
         status: "error",
-        message: "Unable to create the ticket , please try again later",
+        message: "Unable to create the ticket, please try again later",
       });
     } catch (error) {
-      res.json({ status: "error", message: error.message });
+      console.error("Error creating ticket:", error);
+      return res.status(500).json({ 
+        status: "error", 
+        message: error.message || "Internal server error" 
+      });
     }
   }
 );
@@ -92,7 +96,11 @@ router.get("/:_id", userAuthorization, async (req, res) => {
       result,
     });
   } catch (error) {
-    res.json({ status: "error", message: error.message });
+    console.error("Error fetching ticket:", error);
+    return res.status(500).json({ 
+      status: "error", 
+      message: error.message || "Internal server error" 
+    });
   }
 });
 
@@ -115,12 +123,16 @@ router.put(
           message: "your message updated",
         });
       }
-      res.json({
+      return res.status(500).json({
         status: "error",
-        message: "Unable to update your message please try again later",
+        message: "Unable to update your message, please try again later",
       });
     } catch (error) {
-      res.json({ status: "error", message: error.message });
+      console.error("Error updating ticket reply:", error);
+      return res.status(500).json({ 
+        status: "error", 
+        message: error.message || "Internal server error" 
+      });
     }
   }
 );
@@ -139,12 +151,16 @@ router.patch("/close-ticket/:_id", userAuthorization, async (req, res) => {
         message: "The ticket has been closed",
       });
     }
-    res.json({
+    return res.status(500).json({
       status: "error",
       message: "Unable to update the ticket",
     });
   } catch (error) {
-    res.json({ status: "error", message: error.message });
+    console.error("Error closing ticket:", error);
+    return res.status(500).json({ 
+      status: "error", 
+      message: error.message || "Internal server error" 
+    });
   }
 });
 
@@ -161,7 +177,11 @@ router.delete("/:_id", userAuthorization, async (req, res) => {
       message: "The ticket has been deleted",
     });
   } catch (error) {
-    res.json({ status: "error", message: error.message });
+    console.error("Error deleting ticket:", error);
+    return res.status(500).json({ 
+      status: "error", 
+      message: error.message || "Internal server error" 
+    });
   }
 });
 

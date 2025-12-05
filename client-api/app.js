@@ -29,15 +29,37 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB connected successfully!"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
     process.exit(1);
   });
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "OK", 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development"
+  });
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Welcome to the CRM Ticket API",
+    version: "1.0.0",
+    endpoints: {
+      health: "/health",
+      user: "/v1/user",
+      ticket: "/v1/ticket",
+      tokens: "/v1/tokens"
+    }
+  });
+});
 
 // Routes
 app.use("/v1/user", userRouter);
@@ -46,7 +68,7 @@ app.use("/v1/tokens", tokensRouter);
 
 // 404 handler
 app.use((req, res, next) => {
-  const error = new Error("Resource not found!");
+  const error = new Error(`Resource not found: ${req.method} ${req.originalUrl}`);
   error.status = 404;
   next(error);
 });

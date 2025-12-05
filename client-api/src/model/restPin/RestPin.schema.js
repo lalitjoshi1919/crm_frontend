@@ -6,6 +6,7 @@ const ResetPinSchema = new Schema({
     type: String,
     maxlength: 6,
     minlength: 6,
+    required: true,
   },
   email: {
     type: String,
@@ -15,7 +16,7 @@ const ResetPinSchema = new Schema({
   addedAt: {
     type: Date,
     required: true,
-    default: Date.now(),
+    default: Date.now,
   },
 });
 

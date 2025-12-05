@@ -1,4 +1,4 @@
-const { verifyAccessJWT } = require("../helpers/jwt.helper");
+const { verifyAccessJWT } = require("../helpers/jwt.redis.helper");
 const { getJWT, deleteJWT } = require("../helpers/redis.helper");
 
 const userAuthorization = async (req, res, next) => {

@@ -2,10 +2,12 @@ const nodemailer = require("nodemailer");
 
 // Create transporter (switch between Ethereal for dev and SMTP for prod)
 const createTransporter = async () => {
-  if (process.env.NODE_ENV === "production") {
-    // ✅ Production transporter (use real SMTP service like SendGrid, Gmail, AWS SES, Mailgun, etc.)
+  // Check if we have real SMTP credentials
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    // Real SMTP transporter (Gmail, SendGrid, etc.) - WORKS FOR DEMO!
+    console.log("Using REAL SMTP service:", process.env.EMAIL_HOST || "smtp.gmail.com");
     return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST, // e.g., "smtp.sendgrid.net"
+      host: process.env.EMAIL_HOST || "smtp.gmail.com",
       port: process.env.EMAIL_PORT || 587,
       secure: false, // true for port 465, false for 587
       auth: {
@@ -14,8 +16,8 @@ const createTransporter = async () => {
       },
     });
   } else {
-    // ✅ Development transporter (Ethereal for testing)
-
+    // Fallback to Ethereal if no SMTP credentials
+    console.log("No SMTP credentials found, using Ethereal for demo");
     const transporter = nodemailer.createTransport({
       host: "smtp.ethereal.email",
       port: 587,
@@ -27,6 +29,7 @@ const createTransporter = async () => {
     return transporter;
   }
 };
+
 
 // Send email
 const send = async (info) => {

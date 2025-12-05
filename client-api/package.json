@@ -1,9 +1,11 @@
 {
   "name": "new-folder",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "build": "echo 'No build step required for Node.js'"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +23,9 @@
     "mongoose": "^8.15.0",
     "morgan": "^1.10.0",
     "nodemailer": "^7.0.3",
-    "nodemon": "^3.1.10",
     "redis": "^5.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

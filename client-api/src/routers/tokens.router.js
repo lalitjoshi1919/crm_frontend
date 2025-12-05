@@ -1,43 +1,78 @@
 const express = require("express");
 const router = express.Router();
 
-const { verifyRefreshJWT, crateAccessJWT } = require("../helpers/jwt.helper");
+const { verifyRefreshJWT, createAccessJWT } = require("../helpers/jwt.redis.helper");
 const { getUserByEmail } = require("../model/user/User.model");
 
 //return refresh jwt
-router.get("/", async (req, res, next) => {
-  const { authorization } = req.headers;
+router.get("/", async (req, res) => {
+  try {
+    const { authorization } = req.headers;
 
-  //TODO
+    if (!authorization) {
+      return res.status(403).json({ 
+        status: "error",
+        message: "Forbidden: No token provided" 
+      });
+    }
 
-  const decoded = await verifyRefreshJWT(authorization);
-  if (decoded.email) {
+    const decoded = verifyRefreshJWT(authorization);
+    
+    if (!decoded || !decoded.email) {
+      return res.status(403).json({ 
+        status: "error",
+        message: "Forbidden: Invalid or expired token" 
+      });
+    }
+
     const userProf = await getUserByEmail(decoded.email);
 
-    if (userProf._id) {
-      let tokenExp = userProf.refreshJWT.addedAt;
-      const dBrefreshToken = userProf.refreshJWT.token;
-
-      tokenExp = tokenExp.setDate(
-        tokenExp.getDate() + +process.env.JWT_REFRESH_SECRET_EXP_DAY
-      );
-
-      const today = new Date();
-
-      if (dBrefreshToken !== authorization && tokenExp < today) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
-
-      const accessJWT = await crateAccessJWT(
-        decoded.email,
-        userProf._id.toString()
-      );
-
-      return res.json({ status: "success", accessJWT });
+    if (!userProf || !userProf._id) {
+      return res.status(403).json({ 
+        status: "error",
+        message: "Forbidden: User not found" 
+      });
     }
-  }
 
-  res.status(403).json({ message: "Forbidden" });
+    // Check if refresh token matches and is not expired
+    const dBrefreshToken = userProf.refreshJWT?.token;
+    const tokenAddedAt = userProf.refreshJWT?.addedAt;
+
+    if (!tokenAddedAt || !dBrefreshToken) {
+      return res.status(403).json({ 
+        status: "error",
+        message: "Forbidden: Invalid refresh token" 
+      });
+    }
+
+    // Calculate expiration date
+    const expDays = parseInt(process.env.JWT_REFRESH_SECRET_EXP_DAY || 30);
+    const tokenExp = new Date(tokenAddedAt);
+    tokenExp.setDate(tokenExp.getDate() + expDays);
+
+    const today = new Date();
+
+    // Check if token matches and is not expired
+    if (dBrefreshToken !== authorization || tokenExp < today) {
+      return res.status(403).json({ 
+        status: "error",
+        message: "Forbidden: Token expired or invalid" 
+      });
+    }
+
+    const accessJWT = await createAccessJWT(
+      decoded.email,
+      userProf._id.toString()
+    );
+
+    return res.json({ status: "success", accessJWT });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    return res.status(500).json({ 
+      status: "error",
+      message: "Internal server error" 
+    });
+  }
 });
 
 module.exports = router;

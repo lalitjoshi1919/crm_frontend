@@ -14,9 +14,8 @@ export const newUserRegistration = (frmDt) => async (dispatch) => {
     result.status === "success"
       ? dispatch(registrationSuccess(result.message))
       : dispatch(registrationError(result.message));
-
-    console.log(result);
   } catch (error) {
-    dispatch(registrationError(error.message));
+    const errorMessage = error.message || error.response?.data?.message || "Registration failed";
+    dispatch(registrationError(errorMessage));
   }
 };

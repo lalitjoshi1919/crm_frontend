@@ -81,116 +81,113 @@ const UpdatePasswordForm = () => {
 	};
 
 	return (
-		<Container>
-			<Row>
-				<Col>
-					<h1 className="text-info">Update Password</h1>
-				</Col>
-			</Row>
-			<hr />
-			<Row>
-				<Col>
-					{message && (
-						<Alert variant={status === "success" ? "success" : "danger"}>
-							{message}
-						</Alert>
+		<Container className="p-0">
+			<div className="login-header">
+				<div className="login-icon">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+					</svg>
+				</div>
+				<h1>Update Password</h1>
+				<p>Enter your OTP and create a new password</p>
+			</div>
+
+			{message && (
+				<Alert variant={status === "success" ? "success" : "danger"}>
+					{message}
+				</Alert>
+			)}
+
+			<Form onSubmit={handleOnSubmit} autoComplete="off">
+				<Form.Group className="mb-3">
+					<Form.Label>Verification Code (OTP)</Form.Label>
+					<Form.Control
+						type="text"
+						name="pin"
+						value={newPassword.pin}
+						onChange={handleOnChange}
+						placeholder="Enter 6-digit OTP"
+						maxLength="6"
+						required
+					/>
+				</Form.Group>
+
+				<Form.Group className="mb-3">
+					<Form.Label>New Password</Form.Label>
+					<Form.Control
+						type="password"
+						name="password"
+						value={newPassword.password}
+						onChange={handleOnChange}
+						placeholder="Create a strong password"
+						autoComplete="new-password"
+						required
+					/>
+				</Form.Group>
+
+				<Form.Group className="mb-3">
+					<Form.Label>Confirm Password</Form.Label>
+					<Form.Control
+						type="password"
+						name="confirmPass"
+						value={newPassword.confirmPass}
+						onChange={handleOnChange}
+						placeholder="Confirm your password"
+						autoComplete="new-password"
+						required
+					/>
+				</Form.Group>
+
+				{!passwordError.confirmPass && newPassword.confirmPass && (
+					<Alert variant="danger" className="mb-3">
+						Passwords don't match!
+					</Alert>
+				)}
+
+				<div className="password-requirements">
+					<strong className="mb-2 d-block">Password Requirements:</strong>
+					<ul>
+						<li className={passwordError.isLenthy ? "text-success" : "text-danger"}>
+							Minimum 8 characters
+						</li>
+						<li className={passwordError.hasUpper ? "text-success" : "text-danger"}>
+							At least one uppercase letter
+						</li>
+						<li className={passwordError.hasLower ? "text-success" : "text-danger"}>
+							At least one lowercase letter
+						</li>
+						<li className={passwordError.hasNumber ? "text-success" : "text-danger"}>
+							At least one number
+						</li>
+						<li className={passwordError.hasSpclChr ? "text-success" : "text-danger"}>
+							At least one special character (@ # $ % &)
+						</li>
+					</ul>
+				</div>
+
+				<Button
+					variant="primary"
+					type="submit"
+					disabled={Object.values(passwordError).includes(false) || isLoading}
+					className="w-100"
+				>
+					{isLoading ? (
+						<>
+							<Spinner
+								as="span"
+								animation="border"
+								size="sm"
+								role="status"
+								aria-hidden="true"
+								className="me-2"
+							/>
+							Updating...
+						</>
+					) : (
+						'Update Password'
 					)}
-					{isLoading && <Spinner variant="primary" animation="border" />}
-				</Col>
-			</Row>
-
-			<Row>
-				<Col>
-					<Form onSubmit={handleOnSubmit} autoComplete="off">
-						<Form.Group>
-							<Form.Label>OTP</Form.Label>
-							<Form.Control
-								type="number"
-								name="pin"
-								value={newPassword.pin}
-								onChange={handleOnChange}
-								placeholder="OTP"
-								required
-							/>
-						</Form.Group>
-
-						<Form.Group>
-							<Form.Label>Password</Form.Label>
-							<Form.Control
-								type="password"
-								name="password"
-								value={newPassword.password}
-								onChange={handleOnChange}
-								placeholder="Password"
-								required
-							/>
-						</Form.Group>
-
-						<Form.Group>
-							<Form.Label>Confirm Password</Form.Label>
-							<Form.Control
-								type="password"
-								name="confirmPass"
-								value={newPassword.confirmPass}
-								onChange={handleOnChange}
-								placeholder="Confirm Password"
-								required
-							/>
-						</Form.Group>
-						<Form.Text>
-							{!passwordError.confirmPass && (
-								<div className="text-danger mb-3">Password doesn't match!</div>
-							)}
-						</Form.Text>
-
-						<ul className="mb-4">
-							<li
-								className={
-									passwordError.isLenthy ? "text-success" : "text-danger"
-								}
-							>
-								Min 8 characters
-							</li>
-							<li
-								className={
-									passwordError.hasUpper ? "text-success" : "text-danger"
-								}
-							>
-								At least one upper case
-							</li>
-							<li
-								className={
-									passwordError.hasLower ? "text-success" : "text-danger"
-								}
-							>
-								At least one lower case
-							</li>
-							<li
-								className={
-									passwordError.hasNumber ? "text-success" : "text-danger"
-								}
-							>
-								At least one number
-							</li>
-							<li
-								className={
-									passwordError.hasSpclChr ? "text-success" : "text-danger"
-								}
-							>
-								At least on of the special characters i.e @ # $ % &{" "}
-							</li>
-						</ul>
-
-						<Button
-							variant="primary"
-							type="submit"
-							disabled={Object.values(passwordError).includes(false)}
-						>
-							Submit
-						</Button>
-					</Form>
-				</Col>
-			</Row>
+				</Button>
+			</Form>
 		</Container>
 	);
 };
