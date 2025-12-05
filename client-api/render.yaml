@@ -3,6 +3,7 @@ services:
     name: crm-ticket-api
     env: node
     plan: free
+    rootDir: client-api
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
