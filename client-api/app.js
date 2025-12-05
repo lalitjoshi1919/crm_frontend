@@ -1,3 +1,7 @@
+// ========================================
+// CRM TICKET API - UPDATED VERSION v1.1.0
+// Deployment verified: 2024
+// ========================================
 require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
@@ -81,10 +85,12 @@ app.use((error, req, res, next) => handleError(error, res));
 // Start server
 app.listen(port, () => {
   console.log(`========================================`);
+  console.log(`🚀 CRM TICKET API v1.1.0 - UPDATED CODE RUNNING`);
   console.log(`API is ready on http://localhost:${port}`);
   console.log(`Deployment timestamp: ${new Date().toISOString()}`);
   console.log(`Root route handler is registered at: GET /`);
   console.log(`Health check available at: GET /health`);
   console.log(`404 handler includes method and URL in error message`);
+  console.log(`If you see this message, the latest code is deployed!`);
   console.log(`========================================`);
 });
