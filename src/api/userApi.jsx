@@ -19,7 +19,8 @@ export const userRegistration = async (frmData) => {
 // User Registration Verification
 export const userRegistrationVerification = async (_id, email) => {
   try {
-    const encodedEmail = encodeURIComponent(encodeURIComponent(email));
+    // Single encoding is enough - backend will decode it
+    const encodedEmail = encodeURIComponent(email);
     const verificationUrl = `${rootUrl}user/verify/${_id}/${encodedEmail}`;
     const res = await axios.get(verificationUrl, {
       headers: {
@@ -71,21 +72,29 @@ export const fetchUser = async () => {
 export const fetchNewAccessJWT = async () => {
   try {
     const { refreshJWT } = JSON.parse(localStorage.getItem("crmSite") || "{}");
-    if (!refreshJWT) throw new Error("Token not found!");
+    if (!refreshJWT) {
+      throw new Error("Refresh token not found!");
+    }
+    
     const res = await axios.get(newAccessJWT, {
       headers: {
         Authorization: refreshJWT,
       },
     });
-    if (res.data.status === "success") {
+    
+    if (res.data.status === "success" && res.data.accessJWT) {
       sessionStorage.setItem("accessJWT", res.data.accessJWT);
+      return true;
     }
-    return true;
+    
+    throw new Error("Failed to refresh access token");
   } catch (error) {
-    if (error.response?.status === 403) {
+    // Clear tokens on 403 (Forbidden) or any auth error
+    if (error.response?.status === 403 || error.response?.status === 401) {
       localStorage.removeItem("crmSite");
+      sessionStorage.removeItem("accessJWT");
     }
-    throw false;
+    return false;
   }
 };
 
@@ -98,6 +107,11 @@ export const userLogout = async () => {
       },
     });
   } catch (error) {
-    console.log(error);
+    // Silently fail - clear local storage anyway
+    console.error("Logout error:", error);
+  } finally {
+    // Always clear tokens on logout
+    sessionStorage.removeItem("accessJWT");
+    localStorage.removeItem("crmSite");
   }
 };

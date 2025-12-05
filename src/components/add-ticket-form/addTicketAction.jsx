@@ -1,4 +1,3 @@
-/* eslint-disable no-async-promise-executor */
 import {
   openNewTicketPending,
   openNewTicketSuccess,
@@ -6,20 +5,17 @@ import {
 } from "./addTicketSlicer";
 import { createNewTicket } from "../../api/ticketApi";
 
-export const openNewTicket = (frmData) => (dispatch) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      dispatch(openNewTicketPending());
+export const openNewTicket = (frmData) => async (dispatch) => {
+  try {
+    dispatch(openNewTicketPending());
 
-      ////call api
-      const result = await createNewTicket(frmData);
-      if (result.status === "error") {
-        return dispatch(openNewTicketFail(result.message));
-      }
-      dispatch(openNewTicketSuccess(result.message));
-    } catch (error) {
-      console.log(error);
-      dispatch(openNewTicketFail(error.message));
+    const result = await createNewTicket(frmData);
+    if (result.status === "error") {
+      return dispatch(openNewTicketFail(result.message));
     }
-  });
+    dispatch(openNewTicketSuccess(result.message));
+  } catch (error) {
+    const errorMessage = error.message || error.response?.data?.message || "Failed to create ticket";
+    dispatch(openNewTicketFail(errorMessage));
+  }
 };
