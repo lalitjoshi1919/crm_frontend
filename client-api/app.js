@@ -48,6 +48,7 @@ app.get("/health", (req, res) => {
 
 // Root endpoint
 app.get("/", (req, res) => {
+  console.log("Root route accessed:", req.method, req.originalUrl);
   res.status(200).json({
     status: "success",
     message: "Welcome to the CRM Ticket API",
@@ -68,6 +69,7 @@ app.use("/v1/tokens", tokensRouter);
 
 // 404 handler
 app.use((req, res, next) => {
+  console.log("404 - Route not found:", req.method, req.originalUrl);
   const error = new Error(`Resource not found: ${req.method} ${req.originalUrl}`);
   error.status = 404;
   next(error);
@@ -79,4 +81,6 @@ app.use((error, req, res, next) => handleError(error, res));
 // Start server
 app.listen(port, () => {
   console.log(`API is ready on http://localhost:${port}`);
+  console.log(`Root route handler is registered at: GET /`);
+  console.log(`Health check available at: GET /health`);
 });
